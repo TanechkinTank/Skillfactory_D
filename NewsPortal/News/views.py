@@ -2,6 +2,9 @@ from django.views.generic import ListView, DetailView, CreateView, UpdateView, D
 from .models import *
 from .filters import PostFilter
 from .forms import PostForm
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.urls import reverse_lazy
+from django.contrib.auth.mixins import PermissionRequiredMixin
 
 
 class PostList(ListView):
@@ -36,21 +39,26 @@ class PostSearch(ListView):
         return context
 
 
-class PostCreate(CreateView):
+class PostCreate(PermissionRequiredMixin, LoginRequiredMixin, CreateView):
+    raise_exception = True
+    permission_required = ('newsapp.add_post',)
     form_class = PostForm
     model = Post
     template_name = 'flatpages/create.html'
 
 
-class PostEdit(UpdateView):
+class PostEdit(PermissionRequiredMixin, UpdateView):
+    permission_required = ('newsapp.edit_post',)
     form_class = PostForm
     model = Post
     template_name = 'flatpages/edit.html'
 
 
-class PostDelete(DeleteView):
+class PostDelete(PermissionRequiredMixin, DeleteView):
+    permission_required = ('newsapp.delete_post',)
     form_class = PostForm
     model = Post
     template_name = 'flatpages/delete.html'
+    success_url = reverse_lazy('news_list')
 
 
